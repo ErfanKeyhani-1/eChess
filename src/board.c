@@ -85,6 +85,97 @@ void load_fen(const char *fen) {
     }
 }
 
+void print_bitboard(uint64_t bb) {
+    printf("\n");
+
+    for (int rank = 7; rank >= 0; rank--) {
+        printf("%d ", rank + 1);
+
+        for (int file = 0; file < 8; file++) {
+            int sq = rank * 8 + file;
+            uint64_t mask = 1ULL << sq;
+
+            printf("%c ", (bb & mask) ? '1' : '.');
+        }
+
+        printf("\n");
+    }
+
+    printf("  a b c d e f g h\n\n");
+}
+
+uint64_t generate_pawn_pushes_white() {
+    uint64_t empty = ~(pawns_white | pawns_black | knights_white | knights_black |
+                       rooks_white | rooks_black | bishops_white | bishops_black |
+                       queens_white | queens_black | king_white | king_black);
+
+    // Single push: move white pawns 1 rank forward if square is empty
+    uint64_t single_push = (pawns_white << 8) & empty;
+
+    // Double push: only for pawns on rank 2 (bits 8-15) if both squares are empty
+    uint64_t rank2 = pawns_white & 0x000000000000FF00ULL;
+    uint64_t double_push = ((rank2 << 8) & empty) << 8 & empty;
+
+    return single_push | double_push;
+}
+
+uint64_t generate_pawn_pushes_black() {
+    uint64_t occupied =
+        pawns_white | pawns_black |
+        knights_white | knights_black |
+        rooks_white | rooks_black |
+        bishops_white | bishops_black |
+        queens_white | queens_black |
+        king_white | king_black;
+
+    uint64_t empty = ~occupied;
+
+    // Single push (one square forward = down the board)
+    uint64_t single_push = (pawns_black >> 8) & empty;
+
+    // Double push (rank 7 = bits 48–55)
+    uint64_t rank7 = pawns_black & 0x00FF000000000000ULL;
+    uint64_t double_push = ((rank7 >> 8) & empty) >> 8 & empty;
+
+    return single_push | double_push;
+}
+
+uint64_t generate_pawn_captures_white() {
+    uint64_t enemy =
+        pawns_black | knights_black | rooks_black |
+        bishops_black | queens_black | king_black;
+
+    // Mask to avoid wrapping from A-file to H-file
+    uint64_t not_a_file = 0xfefefefefefefefeULL;
+    uint64_t not_h_file = 0x7f7f7f7f7f7f7f7fULL;
+
+    // Capture left (diagonal): shift left by 7 (unless on A-file)
+    uint64_t left_attacks = (pawns_white << 7) & enemy & not_a_file;
+
+    // Capture right (diagonal): shift left by 9 (unless on H-file)
+    uint64_t right_attacks = (pawns_white << 9) & enemy & not_h_file;
+
+    return left_attacks | right_attacks;
+}
+
+uint64_t generate_pawn_captures_black() {
+    uint64_t enemy =
+        pawns_white | knights_white | rooks_white |
+        bishops_white | queens_white | king_white;
+
+    // Prevent A- and H-file wraparounds
+    uint64_t not_a_file = 0xfefefefefefefefeULL;
+    uint64_t not_h_file = 0x7f7f7f7f7f7f7f7fULL;
+
+    // Diag-left (down-left from black POV)
+    uint64_t left_attacks = (pawns_black >> 9) & enemy & not_h_file;
+
+    // Diag-right (down-right from black POV)
+    uint64_t right_attacks = (pawns_black >> 7) & enemy & not_a_file;
+
+    return left_attacks | right_attacks;
+}
+
 void print_board() {
     printf("\n");
 

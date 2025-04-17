@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-
 // Piece ID enum
 typedef enum {
     EMPTY,
@@ -18,7 +17,9 @@ typedef enum {
 // Piece-at-square checker
 Piece get_piece_at_square(int sq);
 
+
 void load_fen(const char *fen);
+void print_bitboard(uint64_t bb);
 
 /*
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -49,6 +50,15 @@ extern uint64_t queens_black;
 // King bitboards
 extern uint64_t king_white;
 extern uint64_t king_black;
+
+
+//=============================PAWN MOVEMENT=================================
+uint64_t generate_pawn_pushes_white();
+uint64_t generate_pawn_pushes_black();
+
+
+uint64_t generate_pawn_captures_white();
+uint64_t generate_pawn_captures_black();
 
 // Function declarations
 void init_board();
