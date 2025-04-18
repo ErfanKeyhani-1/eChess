@@ -1,16 +1,35 @@
-CC=gcc
-CFLAGS=-Wall -Wextra -std=c99 -O2 -Iinclude
-SRC=$(wildcard src/*.c)
-OBJ=$(SRC:.c=.o)
-OUT=build/echess
+# === Compiler and Flags ===
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude
 
-all: $(OUT)
+# === Directories ===
+SRC_DIR = src
+BUILD_DIR = build
 
-$(OUT): $(OBJ)
-	@mkdir -p build
+# === Source Files ===
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRCS:%.c=%.o)
+
+# === Binary Output ===
+TARGET = $(BUILD_DIR)/echess
+
+# === Default Rule ===
+all: $(TARGET)
+
+# === Link Objects to Binary ===
+$(TARGET): $(OBJS)
+	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
-clean:
-	rm -rf build/ *.o src/*.o
+# === Compile Each .c to .o ===
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-.PHONY: all clean
+# === Clean Up ===
+clean:
+	rm -f $(SRC_DIR)/*.o $(TARGET)
+
+# === Run (optional) ===
+run: all
+	./$(TARGET)
+

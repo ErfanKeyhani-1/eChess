@@ -2,7 +2,8 @@
 #define BOARD_H
 
 #include <stdint.h>
-
+#include "attacks.h"
+#include <stdio.h>
 // Piece ID enum
 typedef enum {
     EMPTY,
@@ -20,6 +21,8 @@ Piece get_piece_at_square(int sq);
 
 void load_fen(const char *fen);
 void print_bitboard(uint64_t bb);
+// Add after other declarations in board.h
+int validate_kings(void);
 
 /*
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
