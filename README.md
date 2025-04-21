@@ -11,4 +11,4 @@ Built for performance, clean design, and eventual neural network AI enhancements
 - `build/` — compiled binaries
 
 ## Author
-Erfan Keyhani — Cyber Warfare God™
+Erfan Keyhani
